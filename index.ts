@@ -1,20 +1,27 @@
-import type { Position, Point } from "unist";
 import type { Sentence } from "nlcst";
 import { ParseLatin } from "parse-latin";
 import { toString } from "nlcst-to-string";
 import { visit } from "unist-util-visit";
 
+type Dialogue = {
+  dialogueId: string;
+  children: Sentence[];
+  nodes: string;
+  speakerHint?: string;
+};
 function mergeDialogueSentences(sentences: Sentence[]) {
-  const dialogues: { dialogueId: string; nodes: string; speakerHint?: string }[] = [];
+  const dialogues: Dialogue[] = [];
   let buffer: Sentence[] = [];
   let dialogueId = 0;
   let inDialogue = false;
+  const startQuoteRegex = /^['"“]/;
+  const endQuoteRegex = /[”"].*?$/;
 
   for (const sentence of sentences) {
     const text = toString(sentence);
 
     if (!inDialogue) {
-      if (/^["“]/.test(text)) {
+      if (startQuoteRegex.test(text)) {
         // Start of a new dialogue
         inDialogue = true;
         buffer.push(sentence);
@@ -28,21 +35,21 @@ function mergeDialogueSentences(sentences: Sentence[]) {
     if (inDialogue) {
       // A dialogue block ends if the last sentence has a closing quote,
       // and it's NOT immediately followed by an opening quote (as in "... she said. "New quote...").
-      const endQuoteRegex = /[”"].*?$/;
       if (endQuoteRegex.test(text)) {
         // It has a closing quote. Does it also start a new one?
-        const startsNewDialogue = /[”"],?\s*[a-zA-Z]+\s+[a-zA-Z]+\.\s*["“]/.test(text) || !text.match(/[”"].*?[a-zA-Z]/);
+        const startsNewDialogue =
+          /[”"],?\s*[a-zA-Z]+\s+[a-zA-Z]+\.\s*["“]/.test(text) || !text.match(/[”"].*?[a-zA-Z]/);
 
-        const fullText = buffer.map(s => toString(s)).join(' ');
+        const fullText = buffer.map((s) => toString(s)).join(" ");
         const speakerHintMatch = fullText.match(/[”"]([^”"]*)$/);
-        let speakerHint = (speakerHintMatch?.[1] ?? '').trim();
+        let speakerHint = (speakerHintMatch?.[1] ?? "").trim();
 
         // Special case for hints like ", she said."
-        if (speakerHint.startsWith(',')) {
-            speakerHint = speakerHint.slice(1).trim();
+        if (speakerHint.startsWith(",")) {
+          speakerHint = speakerHint.slice(1).trim();
         }
-        if (speakerHint.endsWith('.') || speakerHint.endsWith(',')) {
-            speakerHint = speakerHint.slice(0, -1);
+        if (speakerHint.endsWith(".") || speakerHint.endsWith(",")) {
+          speakerHint = speakerHint.slice(0, -1);
         }
 
         // Heuristic to decide if we should finalize the dialogue
@@ -51,15 +58,16 @@ function mergeDialogueSentences(sentences: Sentence[]) {
         const hasHint = !!speakerHint;
 
         if (selfContained || hasHint) {
-            dialogues.push({
-                dialogueId: `d${++dialogueId}`,
-                nodes: fullText,
-                ...(speakerHint && { speakerHint }),
-            });
+          dialogues.push({
+            dialogueId: `d${++dialogueId}`,
+            children: buffer,
+            nodes: fullText,
+            ...(speakerHint && { speakerHint }),
+          });
 
-            // Reset for next potential dialogue
-            buffer = [];
-            inDialogue = false;
+          // Reset for next potential dialogue
+          buffer = [];
+          inDialogue = false;
         }
       }
     }
@@ -67,10 +75,11 @@ function mergeDialogueSentences(sentences: Sentence[]) {
 
   // What if the file ends mid-dialogue?
   if (buffer.length > 0) {
-      dialogues.push({
-        dialogueId: `d${++dialogueId}`,
-        nodes: buffer.map(s => toString(s)).join(' '),
-      });
+    dialogues.push({
+      dialogueId: `d${++dialogueId}`,
+      children: buffer,
+      nodes: buffer.map((s) => toString(s)).join(" "),
+    });
   }
 
   return dialogues;
