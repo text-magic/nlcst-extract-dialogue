@@ -1,15 +1,34 @@
-# nlcst-extract-dialogue
+# @text-magic/nlcst-extract-dialogue
 
-To install dependencies:
+## Features
 
-```bash
-bun install
+- Extract dialogues from sentences.
+
+## Installation
+
+TODO:
+
+## Usage
+
+```ts
+import { extractDialogues } from "@text-magic/nlcst-extract-dialogue";
+
+const text = `“Yes, yes. Bank the takings, and lock up the shop,” she said. “Get going or you’ll miss your train.”`;
+const dialogues = extractDialogues(text);
+console.log(dialogues);
 ```
 
-To run:
-
-```bash
-bun run index.ts
+Output:
+```json
+[
+  {
+    "dialogueId": "d1",
+    "nodes": "“Yes, yes. Bank the takings, and lock up the shop,” she said.",
+    "speakerHint": "she said"
+  },
+  {
+    "dialogueId": "d2",
+    "nodes": "“Get going or you’ll miss your train.”"
+  }
+]
 ```
-
-This project was created using `bun init` in bun v1.2.18. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
