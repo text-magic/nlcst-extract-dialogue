@@ -3,13 +3,13 @@ import { describe, it, expect } from "bun:test";
 import { type Dialogue, extractDialogues } from "./index";
 
 describe("extractDialogues", () => {
-  it.only("should not extract dialogues from plain sentences", () => {
+  it("should not extract dialogues from plain sentences", () => {
     const text = "Hello world, how are you?";
     const dialogues = extractDialogues(text);
     expect(dialogues).toEqual([]);
   });
 
-  it.only("should extract dialogues from a dialogue are one whole sentence.", () => {
+  it("should extract dialogues from a dialogue are one whole sentence.", () => {
     const text = `"Yes, peace and love."`;
     const dialogues = extractDialogues(text);
     expect(dialogues).toMatchObject([
@@ -20,7 +20,7 @@ describe("extractDialogues", () => {
     ]);
   });
 
-  it.only("should extract dialogues from a dialogue including multiple sentences", () => {
+  it("should extract dialogues from a dialogue including multiple sentences", () => {
     const text = `"Yes, peace and love. We are the children of the universe."`;
     const dialogues = extractDialogues(text);
     expect(dialogues).toMatchObject([
@@ -31,7 +31,7 @@ describe("extractDialogues", () => {
     ]);
   });
 
-  it.only("should extract multiple dialogues when text contains more than one quoted block", () => {
+  it("should extract multiple dialogues when text contains more than one quoted block", () => {
     const text = `"Hello world!" Some narration. "How are you?"`;
     const dialogues = extractDialogues(text);
     expect(dialogues).toMatchObject([
@@ -46,7 +46,7 @@ describe("extractDialogues", () => {
     ]);
   });
 
-  it.only("should extract dialogues from a sentences including multiple dialogues", () => {
+  it("should extract dialogues from a sentences including multiple dialogues", () => {
     const text = `"Yes, peace and love. We are the children of the universe." and "We need to keep it secret, keep it safe."`;
     const dialogues = extractDialogues(text);
     expect(dialogues).toMatchObject([
@@ -79,8 +79,8 @@ describe("extractDialogues", () => {
     expect(dialogues).toMatchObject([
       {
         dialogueId: "d1",
-        text: `"Yes, peace and love."`,
-        speakerHint: " She said.",
+        text: `"Yes, peace and love,"`,
+        speakerHint: " she said.",
       },
     ]);
   });

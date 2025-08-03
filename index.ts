@@ -26,45 +26,43 @@ function mergeDialogueSentences(sentences: Sentence[], options?: Options) {
   };
   const startQuotes = Object.keys(quotePairs);
 
-  let text = sentences.map((s) => toString(s)).join(" ");
-  let currentIndex = 0;
+  let fullText = sentences.map((s) => toString(s)).join(" ");
 
-  while (currentIndex < text.length) {
-    let firstStartIndex = -1;
-    let startQuote = '';
+  // Split text by dialogues
+  const regex = new RegExp(
+    `([${startQuotes.join("")}][^${startQuotes.join("")}]*?[${Object.values(quotePairs).join(
+      ""
+    )}])`,
+    "g"
+  );
+  const parts = fullText.split(regex).filter((part) => part);
 
-    // Find the next opening quote from the currentIndex
-    for (const q of startQuotes) {
-      const index = text.indexOf(q, currentIndex);
-      if (index !== -1 && (firstStartIndex === -1 || index < firstStartIndex)) {
-        firstStartIndex = index;
-        startQuote = q;
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    const isDialogue = startQuotes.some((q) => part?.startsWith(q));
+
+    if (isDialogue) {
+      let speakerHint = "";
+      // Check for hint before
+      if (i > 0 && !startQuotes.some((q) => parts[i - 1]?.startsWith(q))) {
+        speakerHint += parts[i - 1];
       }
+      // Check for hint after
+      if (i + 1 < parts.length && !startQuotes.some((q) => parts[i + 1]?.startsWith(q))) {
+        speakerHint = (speakerHint ? speakerHint : "") + parts[i + 1];
+      }
+
+      const dialogue: Dialogue = {
+        dialogueId: `d${++dialogueId}`,
+        text: part ?? "",
+      };
+
+      if (speakerHint) {
+        dialogue.speakerHint = speakerHint;
+      }
+
+      dialogues.push(dialogue);
     }
-
-    if (firstStartIndex === -1) {
-      break; // No more dialogues
-    }
-
-    const endQuote = quotePairs[startQuote];
-    if (!endQuote) {
-      break; // Should not happen with current logic
-    }
-
-    const endIndex = text.indexOf(endQuote, firstStartIndex + 1);
-
-    if (endIndex === -1) {
-      break; // Unmatched quote, stop processing
-    }
-
-    const dialogueText = text.substring(firstStartIndex, endIndex + 1);
-    dialogues.push({
-      dialogueId: `d${++dialogueId}`,
-      text: dialogueText,
-    });
-
-    // Move index to the position after the extracted dialogue
-    currentIndex = endIndex + 1;
   }
 
   return dialogues;
