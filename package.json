@@ -1,7 +1,27 @@
 {
-  "name": "nlcst-extract-dialogue",
-  "module": "index.ts",
+  "name": "@text-magic/nlcst-extract-dialogue",
+  "description": "Extract dialogues from sentences",
+  "author": "Zed",
+  "license": "MIT",
+  "homepage": "https://github.com/text-magic/nlcst-extract-dialogue",
+  "version": "0.1.0",
   "type": "module",
+  "files": [
+    "dist"
+  ],
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "scripts": {
+    "build": "bunup"
+  },
   "dependencies": {
     "nlcst-to-string": "^4.0.0",
     "parse-latin": "^7.0.0",
