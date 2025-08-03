@@ -3,7 +3,7 @@ import { ParseLatin } from "parse-latin";
 import { toString } from "nlcst-to-string";
 import { visit } from "unist-util-visit";
 
-type Dialogue = {
+export type Dialogue = {
   dialogueId: string;
   children: Sentence[];
   nodes: string;
@@ -85,7 +85,7 @@ function mergeDialogueSentences(sentences: Sentence[]) {
   return dialogues;
 }
 
-function analyze(text: string) {
+export function extractDialogues(text: string) {
   const parser = new ParseLatin();
   const tree = parser.parse(text);
 
@@ -97,8 +97,10 @@ function analyze(text: string) {
   return mergeDialogueSentences(sentences);
 }
 
-const dialogues = analyze(
-  "“Yes, yes. Bank the takings, and lock up the shop,” she said. “Get going or you’ll miss your train.”"
-);
+if (import.meta.main) {
+  const dialogues = extractDialogues(
+    "“Yes, yes. Bank the takings, and lock up the shop,” she said. “Get going or you’ll miss your train.”"
+  );
 
-console.log(dialogues);
+  console.log(dialogues);
+}

@@ -2,7 +2,6 @@
   "name": "nlcst-extract-dialogue",
   "module": "index.ts",
   "type": "module",
-  "private": true,
   "dependencies": {
     "nlcst-to-string": "^4.0.0",
     "parse-latin": "^7.0.0",
