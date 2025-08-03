@@ -5,11 +5,19 @@ import { visit } from "unist-util-visit";
 
 export type Dialogue = {
   dialogueId: string;
-  children: Sentence[];
+  children?: Sentence[];
   nodes: string;
   speakerHint?: string;
 };
-function mergeDialogueSentences(sentences: Sentence[]) {
+
+type MergeDialogueSentencesOptions = {
+  hasChildren?: boolean;
+};
+
+function mergeDialogueSentences(
+  sentences: Sentence[],
+  options: MergeDialogueSentencesOptions = { hasChildren: false }
+) {
   const dialogues: Dialogue[] = [];
   let buffer: Sentence[] = [];
   let dialogueId = 0;
@@ -60,7 +68,7 @@ function mergeDialogueSentences(sentences: Sentence[]) {
         if (selfContained || hasHint) {
           dialogues.push({
             dialogueId: `d${++dialogueId}`,
-            children: buffer,
+            children: options.hasChildren ? buffer : undefined,
             nodes: fullText,
             ...(speakerHint && { speakerHint }),
           });
@@ -77,7 +85,7 @@ function mergeDialogueSentences(sentences: Sentence[]) {
   if (buffer.length > 0) {
     dialogues.push({
       dialogueId: `d${++dialogueId}`,
-      children: buffer,
+      children: options.hasChildren ? buffer : undefined,
       nodes: buffer.map((s) => toString(s)).join(" "),
     });
   }
@@ -85,7 +93,7 @@ function mergeDialogueSentences(sentences: Sentence[]) {
   return dialogues;
 }
 
-export function extractDialogues(text: string) {
+export function extractDialogues(text: string): Dialogue[] {
   const parser = new ParseLatin();
   const tree = parser.parse(text);
 
@@ -98,9 +106,12 @@ export function extractDialogues(text: string) {
 }
 
 if (import.meta.main) {
-  const dialogues = extractDialogues(
-    "“Yes, yes. Bank the takings, and lock up the shop,” she said. “Get going or you’ll miss your train.”"
-  );
+  console.log("Extracting dialogues...", import.meta.main);
+
+  const text1 = `“Yes, yes. Bank the takings, and lock up the shop,” she said. “Get going or you’ll miss your train.”`;
+  const text2 = `She said, “Yes, yes. Bank the takings, and lock up the shop.” Then she added, “Get going or you’ll miss your train.”`;
+  // const text3 = `丹怒瞪杏仁眼，指着蛋糕, “你说说，这怎么回事?”“我哪儿知道?”我对奶油上的英文感到莫名其妙。看丹的样子，她一定以为是我干的，一场争吵可能避免不了了。陈丹——`;
+  const dialogues = extractDialogues(text2);
 
   console.log(dialogues);
 }

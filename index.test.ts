@@ -9,15 +9,29 @@ describe("extractDialogues", () => {
     expect(dialogues).toEqual([]);
   });
 
-  it("should extract dialogues from text", () => {
-    const text =
-      "“Yes, yes. Bank the takings, and lock up the shop,” she said. “Get going or you’ll miss your train.”";
+  it("should extract dialogues from text1", () => {
+    const text = `“Yes, yes. Bank the takings, and lock up the shop,” she said. “Get going or you’ll miss your train.”`;
     const dialogues = extractDialogues(text);
     expect(dialogues).toMatchObject([
       {
         dialogueId: "d1",
         nodes: "“Yes, yes. Bank the takings, and lock up the shop,” she said.",
         speakerHint: "she said",
+      },
+      {
+        dialogueId: "d2",
+        nodes: "“Get going or you’ll miss your train.”",
+      },
+    ]);
+  });
+
+  it("should extract dialogues from text2", () => {
+    const text = `She said, “Yes, yes. Bank the takings, and lock up the shop.” Then she added, “Get going or you’ll miss your train.”`;
+    const dialogues = extractDialogues(text);
+    expect(dialogues).toMatchObject([
+      {
+        dialogueId: "d1",
+        nodes: "“Yes, yes. Bank the takings, and lock up the shop.”",
       },
       {
         dialogueId: "d2",
